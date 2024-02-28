@@ -1,8 +1,8 @@
+require("dotenv").config();
 const userModel = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-require("dotenv").config();
 
 const signup = async (req, res) => {
   const { username, email, password, user } = req.body;
@@ -120,20 +120,20 @@ const forgetpassword = async (req, res) => {
     await existingUser.save();
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: process.env.HOST,
       service: "gmail",
       port: 465,
       secure: true,
       auth: {
-        user: "ahmednaeemlhr1012@gmail.com",
-        pass: "vzvy njlb pwnr sogk",
+        user: process.env.EMAIL,
+        pass: process.env.PASS,
       },
     });
 
     const mailOptions = {
       from: {
         name: "Ecommerce",
-        address: "ahmednaeemlhr1012@gmail.com",
+        address: process.env.EMAIL,
       },
       to: email,
       subject: "Password Reset Request",
