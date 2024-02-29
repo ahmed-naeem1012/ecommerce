@@ -149,4 +149,60 @@ const forgetpassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, signin, forgetpassword };
+const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  if (!email || !otp || !newPassword) {
+    return res.status(400).json({
+      isSuccessful: false,
+      message: "Missing required fields",
+    });
+  }
+
+  try {
+    const user = await userModel.findOne({ email: email });
+    console.log("OTP:", user.otp);
+    console.log("OTP Expiry:", user.otpExpiry);
+    console.log("Current Time:", new Date());
+
+    if (!user) {
+      return res.status(404).json({
+        isSuccessful: false,
+        message: "User not found",
+      });
+    }
+
+    // Check if OTP matches and is not expired
+    // const currentTime = new Date();
+    if (`${user.otp}` !== `${otp}` || new Date() > new Date(user.otpExpiry)) {
+      return res.status(400).json({
+        isSuccessful: false,
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    // If the OTP checks out, hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user document with the new hashed password and remove the OTP
+    user.password = hashedPassword;
+    user.otp = undefined; // or set to null
+    user.otpExpiry = undefined; // or set to null
+    await user.save();
+
+    res.status(200).json({
+      isSuccessful: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      isSuccessful: false,
+      message: "Error resetting password",
+      error,
+    });
+  }
+};
+
+module.exports = { signup, signin, forgetpassword, resetPassword };
