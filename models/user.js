@@ -18,8 +18,8 @@ const UserSchema = mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true, // Ensure no two users can have the same email
-      match: [/.+\@.+\..+/, "Please fill a valid email address"], // Simple regex for email validation
+      unique: true,
+      match: [/.+\@.+\..+/, "Please fill a valid email address"],
     },
     otp: {
       type: Number,
