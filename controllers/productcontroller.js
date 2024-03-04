@@ -76,5 +76,43 @@ const DeleteProduct = async (req, res) => {
     });
   }
 };
+const ModifyProduct = async (req, res) => {
+  const { id } = req.query; // Changed from req.params to req.query
+  const { name, price, description, boxitems, features } = req.body;
 
-module.exports = { AddProduct, GetAllProducts, DeleteProduct };
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      isSuccessful: false,
+      message: "Invalid ID format",
+    });
+  }
+
+  try {
+    const updatedProduct = await productmodel.findByIdAndUpdate(
+      id,
+      { name, price, description, boxitems, features },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({
+        isSuccessful: false,
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      isSuccessful: true,
+      message: "Product updated successfully",
+      data: updatedProduct,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      isSuccessful: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+module.exports = { AddProduct, GetAllProducts, DeleteProduct, ModifyProduct };
